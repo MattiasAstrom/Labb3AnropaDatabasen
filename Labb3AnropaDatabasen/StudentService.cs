@@ -8,10 +8,14 @@ namespace Labb3AnropaDatabasen
         public void GetStudentsMenu(SchoolAssignmentDBContext context)
         {
             Console.Clear();
-            Console.WriteLine("Sort students by (1) First Name, (2) Last Name: ");
+            Console.WriteLine("Sort students by:");
+            Console.WriteLine("1. First Name");
+            Console.WriteLine("2. Second Name");
             string sortBy = InputValidationHelpers.GetValidSortingOption();
 
-            Console.WriteLine("Sort order (1) Ascending, (2) Descending: ");
+            Console.WriteLine("Sort order:");
+            Console.WriteLine("1. Ascending");
+            Console.WriteLine("2. Descending");
             string sortOrder = InputValidationHelpers.GetValidSortingOption();
 
             var students = GetStudents(context, sortBy, sortOrder);
@@ -72,38 +76,35 @@ namespace Labb3AnropaDatabasen
         public void AddStudent(SchoolAssignmentDBContext context)
         {
             Console.Clear();
+
             string firstName = InputValidationHelpers.GetNonEmptyString("Enter Student First Name: ");
             string lastName = InputValidationHelpers.GetNonEmptyString("Enter Student Last Name: ");
             string phoneNumber = InputValidationHelpers.GetNonEmptyString("Enter Phone Number: ");
             string email = InputValidationHelpers.GetNonEmptyString("Enter Email: ");
             string address = InputValidationHelpers.GetNonEmptyString("Enter Address: ");
-
             string ssn = InputValidationHelpers.GetNonEmptyString("Enter SSN (Social Security Number): ");
 
-            // Start the SSN uniqueness check
+            // Check so SSN (social security number) is unique.
             while (context.Students.Any(s => s.Ssn == ssn))
             {
                 Console.WriteLine("The SSN already exists. Please enter a different SSN.");
                 Console.WriteLine("Press 'Esc' to cancel and go back to the menu.");
 
-                // Allow the user to cancel by pressing 'Esc'
-                var keyPress = Console.ReadKey(intercept: true); // intercept key press to avoid printing to the console
+                var keyPress = Console.ReadKey(); 
 
-                // Check if the user pressed 'Esc' to exit
                 if (keyPress.Key == ConsoleKey.Escape)
                 {
                     Console.WriteLine("\nOperation canceled. Returning to the menu...");
-                    return; // Exit the method and go back to the menu
+                    return;
                 }
 
-                // Otherwise, prompt the user to enter a new SSN
                 ssn = InputValidationHelpers.GetNonEmptyString("Enter SSN (Social Security Number): ");
             }
 
-            // Get or create the Title
-            string titleName = InputValidationHelpers.GetNonEmptyString("Enter Student Title (e.g., Student, Graduate): ");
-            var title = context.Titles.FirstOrDefault(t => t.TitleName == titleName) ?? new Title { TitleName = titleName };
-            context.Titles.Add(title);
+            //NOTE: logic if we wanted to add a custom title to student or a more comprehensive title implementation.
+            //string titleName = InputValidationHelpers.GetNonEmptyString("Enter Student Title (e.g., Student, Graduate): ");
+            //var title = context.Titles.FirstOrDefault(t => t.TitleName == titleName) ?? new Title { TitleName = titleName };
+            //context.Titles.Add(title);
 
             // Create the student and set the properties
             var student = new Student
@@ -114,7 +115,7 @@ namespace Labb3AnropaDatabasen
                 Email = email,
                 Address = address,
                 Ssn = ssn,
-                Title = title.TitleId,
+                Title = context.Titles.FirstOrDefault(t => t.TitleName == "Active Student").TitleId,
                 StudentId = context.Students.Max(s => s.StudentId) + 1
             };
 
@@ -125,7 +126,5 @@ namespace Labb3AnropaDatabasen
             Console.WriteLine("New student added!");
             Console.ReadLine();
         }
-
-
     }
 }

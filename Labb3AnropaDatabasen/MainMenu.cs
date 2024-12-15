@@ -15,11 +15,6 @@ namespace Labb3AnropaDatabasen
         StudentService? _studentService;
         EmployeeService? _employeeService;
 
-        //TODO: option 4 prints out all grades, needs a cleanup though.
-        //TODO: Option 5 prints all courses now needs cleanup.
-        //TODO: 6 & 7 Adding new people needs to be verified.
-        //TODO: Make sure all options work as intended.
-
         private void Init()
         {
             _studentService = new();

@@ -6,13 +6,14 @@ namespace Labb3AnropaDatabasen
 {
     internal class EmployeeService
     {
+        // Get all employees or employees with a specific title
         public void GetEmployeesMenu(SchoolAssignmentDBContext context)
         {
             int choice = 0;
             bool validChoice = false;
 
             Console.Clear();
-            Console.WriteLine("Select a Title:");
+            Console.WriteLine("Available Titles:");
 
             var titles = context.Employees.Select(e => e.TitleNavigation.TitleName).Distinct().ToList();
 
@@ -23,7 +24,7 @@ namespace Labb3AnropaDatabasen
 
             while (!validChoice)
             {
-                Console.WriteLine("Enter the number corresponding to the title (1 to " + (titles.Count + 1) + "):");
+                Console.WriteLine("Pick one between 1 to " + (titles.Count + 1) + ":");
                 string input = Console.ReadLine();
 
                 if (int.TryParse(input, out choice) && choice >= 1 && choice <= titles.Count + 1)
@@ -62,43 +63,22 @@ namespace Labb3AnropaDatabasen
             return query.ToList();
         }
 
+        //Check what grades have been added with the dates that are within the last month.
         public void GetGradesLastMonth(SchoolAssignmentDBContext context)
         {
             Console.Clear();
-
-            // Get the current date
             var currentDate = DateTime.Now;
+            var lastMonthStart = currentDate.AddMonths(-1).Date;
+            var lastMonthEnd = currentDate.Date;
 
-            // Start of the date range (1 month ago from today)
-            var lastMonthStart = currentDate.AddMonths(-1).Date;  // 1 month back from today at midnight (ignoring time)
-
-            // End of the date range (today)
-            var lastMonthEnd = currentDate.Date;  // Today's date at midnight (ignoring time)
-
-            // Print the date range for debugging
-            Console.WriteLine($"Date Range: {lastMonthStart.ToShortDateString()} to {lastMonthEnd.ToShortDateString()}");
-
-            // Check all grades with non-null DateOfGrading
             var allGrades = context.Grades
                 .Where(g => g.DateOfGrading.HasValue)
                 .ToList();
 
-            // Print out the found grades and their DateOfGrading for debugging
-            Console.WriteLine($"Found {allGrades.Count} grades with non-null DateOfGrading:");
-            foreach (var grade in allGrades)
-            {
-                Console.WriteLine($"GradeId: {grade.GradeId}, DateOfGrading: {grade.DateOfGrading?.ToShortDateString()}");
-            }
-
-            // Filter grades within the date range (between November 15th and December 15th)
             var gradesQuery = allGrades
-                 .Where(g => g.DateOfGrading.Value.Month >= lastMonthStart.Month && g.DateOfGrading.Value.Month <= lastMonthEnd.Month)
+                 .Where(g => (g.DateOfGrading.Value.Year == currentDate.Year) && (g.DateOfGrading.Value.Month >= lastMonthStart.Month) && (g.DateOfGrading.Value.Month <= lastMonthEnd.Month))
                  .ToList();
 
-            // Print out how many grades matched the date range
-            Console.WriteLine($"Found {gradesQuery.Count} grades between {lastMonthStart.ToShortDateString()} and {lastMonthEnd.ToShortDateString()}.");
-
-            // If there are no grades, notify and return
             if (gradesQuery.Any())
             {
                 var grades = gradesQuery
@@ -119,8 +99,6 @@ namespace Labb3AnropaDatabasen
                     })
                     .ToList();
 
-                // Print the grades with student and course details
-                Console.WriteLine("Grades from the last month (between 11/15/2024 and 12/15/2024):\n");
                 foreach (var grade in grades)
                 {
                     Console.WriteLine($"Student: {grade.StudentName}, " +
@@ -137,62 +115,57 @@ namespace Labb3AnropaDatabasen
             Console.ReadKey();
         }
 
+        //Goes through every course and prints AVG grade, highest grade and lowest grade.
         public void GetCoursesWithGrades(SchoolAssignmentDBContext context)
         {
             Console.Clear();
-
-            // Map letter grades to numeric values
+            Console.WriteLine("Loading...");
             Dictionary<string, double> gradeMapping = new Dictionary<string, double>
-    {
-        { "A+", 8 },
-        { "A", 7 },
-        { "B+", 6 },
-        { "B", 5 },
-        { "C+", 4 },
-        { "C", 3 },
-        { "D+", 2 },
-        { "D", 1 },
-        { "F", 0 }
-    };
+            {
+                { "A+", 8 },
+                { "A", 7 },
+                { "B+", 6 },
+                { "B", 5 },
+                { "C+", 4 },
+                { "C", 3 },
+                { "D+", 2 },
+                { "D", 1 },
+                { "F", 0 }
+            };
 
-            // Reverse the grade mapping for converting numeric back to letter grades
+            //used to easier get letter grade from numeric grade, don't have loop through the original dictionary.
             Dictionary<double, string> reverseGradeMapping = gradeMapping.ToDictionary(x => x.Value, x => x.Key);
-
             var courses = context.Courses.Include(c => c.Grades).ToList();
+            Console.Clear();
 
             foreach (var course in courses)
             {
-                // Convert letter grades to numeric grades
                 var numericGrades = course.Grades
                     .Where(g => !string.IsNullOrWhiteSpace(g.Grade1) && gradeMapping.ContainsKey(g.Grade1.Trim()))  // Trim and check validity
                     .Select(g => gradeMapping[g.Grade1.Trim()])
                     .ToList();
 
-                // Debugging: Print the grades that are being processed
                 if (numericGrades.Any())
                 {
                     var avgGrade = numericGrades.Average();
                     var highestGrade = numericGrades.Max();
                     var lowestGrade = numericGrades.Min();
 
-                    // Convert numeric average back to letter grade
+                    // Convert numeric average back to letter grade using the reversed grade dictionary
                     string avgLetterGrade = GetLetterGrade(avgGrade, reverseGradeMapping);
 
                     Console.WriteLine($"Course: {course.CourseName}, Average Grade: {avgLetterGrade}, Highest Grade: {reverseGradeMapping[highestGrade]}, Lowest Grade: {reverseGradeMapping[lowestGrade]}");
                 }
                 else
-                {
                     Console.WriteLine($"Course: {course.CourseName}, No valid grades.");
-                }
             }
 
             Console.ReadLine();
         }
 
-        // Function to map numeric average to the corresponding letter grade
+        // Get avg letter grade based on the closest numeric score.
         private string GetLetterGrade(double avgGrade, Dictionary<double, string> reverseGradeMapping)
         {
-            // Find the closest numeric grade and map it back to the letter grade
             var closestGrade = reverseGradeMapping.Keys.OrderBy(x => Math.Abs(x - avgGrade)).First();
             return reverseGradeMapping[closestGrade];
         }
@@ -201,39 +174,30 @@ namespace Labb3AnropaDatabasen
         {
             Console.Clear();
 
-            // Display all current titles excluding "Student" and "Graduated Student"
+            // Display all current titles excluding "Active Student" and "Graduated Student"
             var existingTitles = context.Titles
                 .Where(t => t.TitleName != "Active Student" && t.TitleName != "Graduated Student")
                 .Select(t => t.TitleName)
                 .ToList();
 
-            Console.WriteLine("Existing Titles:");
-            foreach (var item in existingTitles)
-            {
-                Console.WriteLine($"- {item}");
-            }
+            Console.WriteLine("Enter new employee details!");
 
-            Console.WriteLine("\nEnter new employee details:");
-
+            //Get all the new information about the employee
             string firstName = InputValidationHelpers.GetNonEmptyString("Enter First Name: ");
             string lastName = InputValidationHelpers.GetNonEmptyString("Enter Last Name: ");
             string phoneNumber = InputValidationHelpers.GetNonEmptyString("Enter Phone Number: ");
             string email = InputValidationHelpers.GetNonEmptyString("Enter Email: ");
+            string titleName = "";
 
-            // Get or create the Title
-            foreach (var item in existingTitles)
-                Console.WriteLine($"- {item}");
-            
-            string titleName = InputValidationHelpers.GetNonEmptyString("Enter Employee Title (e.g., Teacher, Admin): ");
-            var title = context.Titles.FirstOrDefault(t => t.TitleName == titleName) ?? new Title { TitleName = titleName };
+            Console.WriteLine("Existing Titles:");
+            for (int i = 0; i < existingTitles.Count; i++)
+                Console.WriteLine($"{i + 1}. {existingTitles[i]}");
 
-            // Avoid adding duplicate titles, only add if the title doesn't already exist
-            if (!existingTitles.Contains(titleName))
-            {
-                context.Titles.Add(title);
-            }
+            int selectedTitleIndex = InputValidationHelpers.GetValidClassChoice(existingTitles.Count); // Use GetValidClassChoice for selecting a title
+            string selectedTitleName = existingTitles[selectedTitleIndex - 1];
+            var title = context.Titles.FirstOrDefault(t => t.TitleName == selectedTitleName);
 
-            // Create the employee and set the properties
+            // create a new employee object
             var employee = new Employee
             {
                 FirstName = firstName,
@@ -241,7 +205,7 @@ namespace Labb3AnropaDatabasen
                 PhoneNumber = phoneNumber,
                 Email = email,
                 Title = title.TitleId,
-                EmployeeId = context.Students.Max(s => s.StudentId) + 1
+                EmployeeId = context.Employees.Max(e => e.EmployeeId) + 1 // Assuming EmployeeId is not auto-incremented
             };
 
             // Add the new employee to the database
@@ -251,6 +215,5 @@ namespace Labb3AnropaDatabasen
             Console.WriteLine("New employee added!");
             Console.ReadLine();
         }
-
     }
 }
