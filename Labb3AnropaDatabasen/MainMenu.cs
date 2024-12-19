@@ -21,12 +21,26 @@ namespace Labb3AnropaDatabasen
             _employeeService = new();
         }
 
-        public void Start()
+        public async void Start()
         {
             Init();
+
             using (SchoolAssignmentDBContext context = new())
             {
                 bool isRunning = true;
+
+                // Call the stored procedure to get student info for a specific student
+                int studentId = 1; // Example student ID
+                var studentInfo = await _studentService.GetStudentInfoAsync(studentId, context);
+
+                // Output student info to the console
+                foreach (var student in studentInfo)
+                {
+                    Console.WriteLine($"Name: {student.FirstName} {student.LastName}, Address: {student.Address}, Email: {student.Email}, Title: {student.Title}");
+                }
+                
+                Console.WriteLine("Done");
+                Console.ReadLine();
 
                 while (isRunning)
                 {
@@ -39,6 +53,10 @@ namespace Labb3AnropaDatabasen
                     Console.WriteLine("5. Hämta kurser med snittbetyg");
                     Console.WriteLine("6. Lägga till nya elever");
                     Console.WriteLine("7. Lägga till ny personal");
+
+                    Console.WriteLine("8. Hur många lärare jobbar på de olika avdelningarna?");
+                    Console.WriteLine("9. Visa information om alla elever");
+                    Console.WriteLine("10. Visa en lsita på alla aktive kurser");
 
                     int choice = GetValidMenuChoice();
 

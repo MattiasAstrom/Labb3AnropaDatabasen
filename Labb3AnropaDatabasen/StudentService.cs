@@ -1,5 +1,6 @@
 ﻿using Labb3AnropaDatabasen.Data;
 using Labb3AnropaDatabasen.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Labb3AnropaDatabasen
 {
@@ -67,6 +68,16 @@ namespace Labb3AnropaDatabasen
             Console.ReadLine();
         }
 
+        public async Task<List<StudentInfoDTO>> GetStudentInfoAsync(int studentId, DbContext context)
+        {
+            // Execute the stored procedure using FromSqlRaw
+            var studentInfoList = await context
+                .Database
+                .SqlQuery<StudentInfoDTO>($"EXEC GetStudentInfo @StudentId = {studentId}")
+                .ToListAsync();
+
+            return studentInfoList;
+        }
 
         public List<Student> GetStudentsByTitle(SchoolAssignmentDBContext context, int titleId)
         {
