@@ -18,6 +18,8 @@ public partial class SchoolAssignmentDBContext : DbContext
 
     public virtual DbSet<Course> Courses { get; set; }
 
+    public virtual DbSet<Department> Departments { get; set; }
+
     public virtual DbSet<Employee> Employees { get; set; }
 
     public virtual DbSet<Grade> Grades { get; set; }
@@ -34,11 +36,9 @@ public partial class SchoolAssignmentDBContext : DbContext
     {
         modelBuilder.Entity<Course>(entity =>
         {
-            entity.HasKey(e => e.CourseId).HasName("PK__Courses__37E005FB1854F90F");
+            entity.HasKey(e => e.CourseId).HasName("PK__Courses__37E005FB906570ED");
 
-            entity.Property(e => e.CourseId)
-                .ValueGeneratedNever()
-                .HasColumnName("Course_ID");
+            entity.Property(e => e.CourseId).HasColumnName("Course_ID");
             entity.Property(e => e.CourseDescription).IsUnicode(false);
             entity.Property(e => e.CourseName)
                 .HasMaxLength(25)
@@ -46,16 +46,24 @@ public partial class SchoolAssignmentDBContext : DbContext
 
             entity.HasOne(d => d.CourseTeacherNavigation).WithMany(p => p.Courses)
                 .HasForeignKey(d => d.CourseTeacher)
-                .HasConstraintName("FK__Courses__CourseT__2D27B809");
+                .HasConstraintName("FK__Courses__CourseT__33D4B598");
+        });
+
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasKey(e => e.DepartmentId).HasName("PK__Departme__151675D15EF782FD");
+
+            entity.Property(e => e.DepartmentId).HasColumnName("Department_ID");
+            entity.Property(e => e.DepartmentName)
+                .HasMaxLength(25)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.HasKey(e => e.EmployeeId).HasName("PK__Employee__781134814B09F9D9");
+            entity.HasKey(e => e.EmployeeId).HasName("PK__Employee__781134814544508B");
 
-            entity.Property(e => e.EmployeeId)
-                .ValueGeneratedNever()
-                .HasColumnName("Employee_ID");
+            entity.Property(e => e.EmployeeId).HasColumnName("Employee_ID");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .IsUnicode(false);
@@ -69,18 +77,39 @@ public partial class SchoolAssignmentDBContext : DbContext
                 .HasMaxLength(15)
                 .IsUnicode(false);
 
+            entity.HasOne(d => d.PrimaryDepartmentNavigation).WithMany(p => p.Employees)
+                .HasForeignKey(d => d.PrimaryDepartment)
+                .HasConstraintName("FK__Employees__Prima__2D27B809");
+
             entity.HasOne(d => d.TitleNavigation).WithMany(p => p.Employees)
                 .HasForeignKey(d => d.Title)
-                .HasConstraintName("FK__Employees__Title__2A4B4B5E");
+                .HasConstraintName("FK__Employees__Title__2C3393D0");
+
+            entity.HasMany(d => d.Departments).WithMany(p => p.EmployeesNavigation)
+                .UsingEntity<Dictionary<string, object>>(
+                    "EmployeeDepartment",
+                    r => r.HasOne<Department>().WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK__EmployeeD__Depar__30F848ED"),
+                    l => l.HasOne<Employee>().WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK__EmployeeD__Emplo__300424B4"),
+                    j =>
+                    {
+                        j.HasKey("EmployeeId", "DepartmentId").HasName("PK__Employee__794053DCCCF55940");
+                        j.ToTable("EmployeeDepartments");
+                        j.IndexerProperty<int>("EmployeeId").HasColumnName("Employee_ID");
+                        j.IndexerProperty<int>("DepartmentId").HasColumnName("Department_ID");
+                    });
         });
 
         modelBuilder.Entity<Grade>(entity =>
         {
-            entity.HasKey(e => e.GradeId).HasName("PK__Grades__D4437153980455F6");
+            entity.HasKey(e => e.GradeId).HasName("PK__Grades__D44371535DA0C590");
 
-            entity.Property(e => e.GradeId)
-                .ValueGeneratedNever()
-                .HasColumnName("Grade_ID");
+            entity.Property(e => e.GradeId).HasColumnName("Grade_ID");
             entity.Property(e => e.CourseId).HasColumnName("Course_ID");
             entity.Property(e => e.Grade1)
                 .HasMaxLength(2)
@@ -92,26 +121,24 @@ public partial class SchoolAssignmentDBContext : DbContext
 
             entity.HasOne(d => d.Course).WithMany(p => p.Grades)
                 .HasForeignKey(d => d.CourseId)
-                .HasConstraintName("FK__Grades__Course_I__30F848ED");
+                .HasConstraintName("FK__Grades__Course_I__37A5467C");
 
             entity.HasOne(d => d.Student).WithMany(p => p.Grades)
                 .HasForeignKey(d => d.StudentId)
-                .HasConstraintName("FK__Grades__Student___300424B4");
+                .HasConstraintName("FK__Grades__Student___36B12243");
 
             entity.HasOne(d => d.Teacher).WithMany(p => p.Grades)
                 .HasForeignKey(d => d.TeacherId)
-                .HasConstraintName("FK__Grades__Teacher___31EC6D26");
+                .HasConstraintName("FK__Grades__Teacher___38996AB5");
         });
 
         modelBuilder.Entity<Student>(entity =>
         {
-            entity.HasKey(e => e.StudentId).HasName("PK__Students__A2F4E9ACDF06D938");
+            entity.HasKey(e => e.StudentId).HasName("PK__Students__A2F4E9AC0EFBB798");
 
-            entity.HasIndex(e => e.Ssn, "UQ__Students__CA1E8E3C7050C5C1").IsUnique();
+            entity.HasIndex(e => e.Ssn, "UQ__Students__CA1E8E3C841FE4A4").IsUnique();
 
-            entity.Property(e => e.StudentId)
-                .ValueGeneratedNever()
-                .HasColumnName("Student_ID");
+            entity.Property(e => e.StudentId).HasColumnName("Student_ID");
             entity.Property(e => e.Address)
                 .HasMaxLength(100)
                 .IsUnicode(false);
@@ -139,11 +166,9 @@ public partial class SchoolAssignmentDBContext : DbContext
 
         modelBuilder.Entity<Title>(entity =>
         {
-            entity.HasKey(e => e.TitleId).HasName("PK__Titles__01D44740C7895D1E");
+            entity.HasKey(e => e.TitleId).HasName("PK__Titles__01D44740082F4708");
 
-            entity.Property(e => e.TitleId)
-                .ValueGeneratedNever()
-                .HasColumnName("Title_ID");
+            entity.Property(e => e.TitleId).HasColumnName("Title_ID");
             entity.Property(e => e.TitleName)
                 .HasMaxLength(50)
                 .IsUnicode(false);
