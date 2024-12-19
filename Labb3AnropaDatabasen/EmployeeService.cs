@@ -204,8 +204,7 @@ namespace Labb3AnropaDatabasen
                 LastName = lastName,
                 PhoneNumber = phoneNumber,
                 Email = email,
-                Title = title.TitleId,
-                EmployeeId = context.Employees.Max(e => e.EmployeeId) + 1 // Assuming EmployeeId is not auto-incremented
+                Title = title.TitleId
             };
 
             // Add the new employee to the database

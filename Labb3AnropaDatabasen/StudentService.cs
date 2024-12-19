@@ -115,8 +115,7 @@ namespace Labb3AnropaDatabasen
                 Email = email,
                 Address = address,
                 Ssn = ssn,
-                Title = context.Titles.FirstOrDefault(t => t.TitleName == "Active Student").TitleId,
-                StudentId = context.Students.Max(s => s.StudentId) + 1
+                Title = context.Titles.FirstOrDefault(t => t.TitleName == "Active Student").TitleId
             };
 
             // Add the new student to the database
