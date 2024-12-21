@@ -8,17 +8,33 @@ namespace Labb3AnropaDatabasen
 {
     static internal class InputValidationHelpers
     {
-        static public string GetValidSortingOption()
+        static public int GetValidMenuChoice(int min, int max)
+        {
+            int choice;
+            while (true)
+            {
+                ConsoleKeyInfo input = Console.ReadKey();
+                if (int.TryParse(input.KeyChar.ToString(), out choice) && choice >= min && choice <= max)
+                {
+                    return choice;
+                }
+                Console.WriteLine($"Invalid input! Please select a number between {min} and {max}.");
+            }
+        }
+
+        static public string GetValidSortingOption<T>(T first, T second)
         {
             string option;
             while (true)
             {
                 option = Console.ReadLine();
+                
                 if (option == "1" || option == "2")
                 {
                     return option;
                 }
-                Console.WriteLine("Invalid choice. Please select (1) or (2).");
+
+                Console.WriteLine($"Invalid choice. Please select one: \n 1. {first}) \n ({second}).");
             }
         }
 

@@ -21,26 +21,13 @@ namespace Labb3AnropaDatabasen
             _employeeService = new();
         }
 
-        public async void Start()
+        public void Start()
         {
             Init();
 
             using (SchoolAssignmentDBContext context = new())
             {
                 bool isRunning = true;
-
-                // Call the stored procedure to get student info for a specific student
-                int studentId = 1; // Example student ID
-                var studentInfo = await _studentService.GetStudentInfoAsync(studentId, context);
-
-                // Output student info to the console
-                foreach (var student in studentInfo)
-                {
-                    Console.WriteLine($"Name: {student.FirstName} {student.LastName}, Address: {student.Address}, Email: {student.Email}, Title: {student.Title}");
-                }
-                
-                Console.WriteLine("Done");
-                Console.ReadLine();
 
                 while (isRunning)
                 {
@@ -58,7 +45,7 @@ namespace Labb3AnropaDatabasen
                     Console.WriteLine("9. Visa information om alla elever");
                     Console.WriteLine("10. Visa en lsita på alla aktive kurser");
 
-                    int choice = GetValidMenuChoice();
+                    int choice = InputValidationHelpers.GetValidMenuChoice(1,9);
 
                     switch (choice)
                     {
@@ -85,20 +72,6 @@ namespace Labb3AnropaDatabasen
                             break;
                     }
                 }
-            }
-        }
-
-        private int GetValidMenuChoice()
-        {
-            int choice;
-            while (true)
-            {
-                ConsoleKeyInfo input = Console.ReadKey();
-                if (int.TryParse(input.KeyChar.ToString(), out choice) && choice >= 1 && choice <= 7)
-                {
-                    return choice;
-                }
-                Console.WriteLine("\nInvalid input! Please select a number between 1 and 7.");
             }
         }
     }

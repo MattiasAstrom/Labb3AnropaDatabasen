@@ -12,12 +12,12 @@ namespace Labb3AnropaDatabasen
             Console.WriteLine("Sort students by:");
             Console.WriteLine("1. First Name");
             Console.WriteLine("2. Second Name");
-            string sortBy = InputValidationHelpers.GetValidSortingOption();
+            string sortBy = InputValidationHelpers.GetValidSortingOption(1,2);
 
             Console.WriteLine("Sort order:");
             Console.WriteLine("1. Ascending");
             Console.WriteLine("2. Descending");
-            string sortOrder = InputValidationHelpers.GetValidSortingOption();
+            string sortOrder = InputValidationHelpers.GetValidSortingOption(1,2);
 
             var students = GetStudents(context, sortBy, sortOrder);
             foreach (var student in students)
@@ -68,16 +68,6 @@ namespace Labb3AnropaDatabasen
             Console.ReadLine();
         }
 
-        public async Task<List<StudentInfoDTO>> GetStudentInfoAsync(int studentId, DbContext context)
-        {
-            // Execute the stored procedure using FromSqlRaw
-            var studentInfoList = await context
-                .Database
-                .SqlQuery<StudentInfoDTO>($"EXEC GetStudentInfo @StudentId = {studentId}")
-                .ToListAsync();
-
-            return studentInfoList;
-        }
 
         public List<Student> GetStudentsByTitle(SchoolAssignmentDBContext context, int titleId)
         {
