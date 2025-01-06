@@ -19,5 +19,7 @@ public partial class Course
 
     public virtual Employee? CourseTeacherNavigation { get; set; }
 
+    public virtual ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+
     public virtual ICollection<Grade> Grades { get; set; } = new List<Grade>();
 }

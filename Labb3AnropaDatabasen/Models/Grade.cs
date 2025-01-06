@@ -19,6 +19,8 @@ public partial class Grade
 
     public virtual Course? Course { get; set; }
 
+    public virtual ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+
     public virtual Student? Student { get; set; }
 
     public virtual Employee? Teacher { get; set; }

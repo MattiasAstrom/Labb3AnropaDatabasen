@@ -22,6 +22,8 @@ public partial class SchoolAssignmentDBContext : DbContext
 
     public virtual DbSet<Employee> Employees { get; set; }
 
+    public virtual DbSet<Enrollment> Enrollments { get; set; }
+
     public virtual DbSet<Grade> Grades { get; set; }
 
     public virtual DbSet<Student> Students { get; set; }
@@ -31,7 +33,6 @@ public partial class SchoolAssignmentDBContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=SchoolAssignmentDB;Integrated Security=True;Trust Server Certificate=True;");
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,6 +105,28 @@ public partial class SchoolAssignmentDBContext : DbContext
                         j.IndexerProperty<int>("EmployeeId").HasColumnName("Employee_ID");
                         j.IndexerProperty<int>("DepartmentId").HasColumnName("Department_ID");
                     });
+        });
+
+        modelBuilder.Entity<Enrollment>(entity =>
+        {
+            entity.HasKey(e => e.EnrollmentId).HasName("PK__Enrollme__4365BD6A7CAAB65B");
+
+            entity.Property(e => e.EnrollmentId).HasColumnName("Enrollment_ID");
+            entity.Property(e => e.FkCourseId).HasColumnName("FK_Course_ID");
+            entity.Property(e => e.FkStudentId).HasColumnName("FK_Student_ID");
+            entity.Property(e => e.GradeId).HasColumnName("Grade_ID");
+
+            entity.HasOne(d => d.FkCourse).WithMany(p => p.Enrollments)
+                .HasForeignKey(d => d.FkCourseId)
+                .HasConstraintName("FK__Enrollmen__FK_Co__5441852A");
+
+            entity.HasOne(d => d.FkStudent).WithMany(p => p.Enrollments)
+                .HasForeignKey(d => d.FkStudentId)
+                .HasConstraintName("FK__Enrollmen__FK_St__5535A963");
+
+            entity.HasOne(d => d.Grade).WithMany(p => p.Enrollments)
+                .HasForeignKey(d => d.GradeId)
+                .HasConstraintName("FK__Enrollmen__Grade__5629CD9C");
         });
 
         modelBuilder.Entity<Grade>(entity =>

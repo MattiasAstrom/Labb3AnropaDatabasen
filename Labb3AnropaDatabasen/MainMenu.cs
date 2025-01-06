@@ -43,7 +43,7 @@ namespace Labb3AnropaDatabasen
                     Console.WriteLine("6. Visa information om alla elever");
                     Console.WriteLine("7. Visa en lsita på alla aktive kurser");
 
-                    int choice = InputValidationHelpers.GetValidMenuChoice(1,9);
+                    int choice = InputValidationHelpers.GetValidMenuChoice(1, 9);
 
                     switch (choice)
                     {
@@ -66,11 +66,25 @@ namespace Labb3AnropaDatabasen
                             _studentService?.GetStudentsInfo(context); //the requirment is to show info about all students, not what type of info so i've simply added the most basic info.
                             break;
                         case 7:
-                            //_studentService?.GetActiveCourses(context);
+                            GetAllActiveCourses(context);
                             break;
                     }
                 }
             }
+        }
+
+        private void GetAllActiveCourses(SchoolAssignmentDBContext context)
+        {
+            var courses = context.Courses.ToList();
+
+            foreach (var course in courses)
+            {
+                if (course.ArchivedBoolean == 0) //bool check, 1 = archived, 0 = active
+                {
+                    Console.WriteLine($"{course.CourseName}");
+                }
+            }
+            Console.ReadLine();
         }
     }
 }
