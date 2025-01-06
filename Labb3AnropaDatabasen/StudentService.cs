@@ -27,6 +27,17 @@ namespace Labb3AnropaDatabasen
             Console.ReadLine();
         }
 
+        public void GetStudentsInfo(SchoolAssignmentDBContext context)
+        {
+            Console.Clear();
+            var students = context.Students.ToList();
+            foreach (var student in students)
+            {
+                Console.WriteLine($"{student.FirstName} {student.LastName}, Address: {student.Address}, Email: {student.Email}, Phone: {student.PhoneNumber}, SSN: {student.Ssn}");
+            }
+            Console.ReadLine();
+        }
+
         public List<Student> GetStudents(SchoolAssignmentDBContext context, string sortBy, string sortOrder)
         {
             var query = context.Students.AsQueryable();

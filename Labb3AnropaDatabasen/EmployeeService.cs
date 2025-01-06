@@ -214,5 +214,20 @@ namespace Labb3AnropaDatabasen
             Console.WriteLine("New employee added!");
             Console.ReadLine();
         }
+
+        public void GetEmployeesByDepartment(SchoolAssignmentDBContext context)
+        {
+            // Get departments with their associated employees
+            var departments = context.Departments.Include(d => d.Employees).ToList();
+
+            // Loop through each department and print the department name and the number of employees
+            foreach (var department in departments)
+            {
+                // Print the department name and the count of employees in that department
+                Console.WriteLine($"Department: {department.DepartmentName}, Employees: {department.Employees.Count}");
+            }
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
     }
 }

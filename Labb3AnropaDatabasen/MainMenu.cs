@@ -37,13 +37,11 @@ namespace Labb3AnropaDatabasen
                     Console.WriteLine("2. Hämta alla elever");
                     Console.WriteLine("3. Hämta alla elever i en viss klass");
                     Console.WriteLine("4. Hämta betyg från senaste månaden");
-                    Console.WriteLine("5. Hämta kurser med snittbetyg");
-                    Console.WriteLine("6. Lägga till nya elever");
-                    Console.WriteLine("7. Lägga till ny personal");
 
-                    Console.WriteLine("8. Hur många lärare jobbar på de olika avdelningarna?");
-                    Console.WriteLine("9. Visa information om alla elever");
-                    Console.WriteLine("10. Visa en lsita på alla aktive kurser");
+                    // The following options are new for "slutprojektets" requirments.
+                    Console.WriteLine("5. Hur många lärare jobbar på de olika avdelningarna?");
+                    Console.WriteLine("6. Visa information om alla elever");
+                    Console.WriteLine("7. Visa en lsita på alla aktive kurser");
 
                     int choice = InputValidationHelpers.GetValidMenuChoice(1,9);
 
@@ -62,13 +60,13 @@ namespace Labb3AnropaDatabasen
                             _employeeService?.GetGradesLastMonth(context);
                             break;
                         case 5:
-                            _employeeService?.GetCoursesWithGrades(context);
+                            _employeeService?.GetEmployeesByDepartment(context);
                             break;
                         case 6:
-                            _studentService?.AddStudent(context);
+                            _studentService?.GetStudentsInfo(context); //the requirment is to show info about all students, not what type of info so i've simply added the most basic info.
                             break;
                         case 7:
-                            _employeeService?.AddEmployee(context);
+                            //_studentService?.GetActiveCourses(context);
                             break;
                     }
                 }
